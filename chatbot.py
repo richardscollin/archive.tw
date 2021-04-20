@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 Row = namedtuple('Row', ['input', 'output'])
 # %%
+input_lens = Counter()
 lens = set()
 def get_transcript(tree: ElementTree, target_speaker: str):
     # fold text in different speech nodes by the same target_speaker
@@ -26,11 +27,19 @@ def get_transcript(tree: ElementTree, target_speaker: str):
                     # Do some preprocessing of the tokens
                     return re.sub(r'[^\x00-\x7F]+', ' ', text)
 
-            input  = " ".join(" ".join([process_speech(e) for e in g1[1]]).split()[:900])
+            input  = " ".join(" ".join([process_speech(e) for e in g1[1]]).split()[:600])
             output = " ".join(" ".join([process_speech(e) for e in g2[1]]).split()[:900])
             row = Row(input, output)
-            lens.add(len(input.split()))
-            lens.add(len(output.split()))
+            input_len = len(input.split())
+            output_len = len(output.split())
+            lens.add(input_len)
+            lens.add(output_len)
+            input_lens[input_len] += 1
+
+            # if input_len > 600:
+                # print(input)
+                # print(len(output.split()))
+
             result.append(row)
     return result
 
@@ -51,4 +60,7 @@ df = pd.DataFrame(transcripts, columns=["input", "output"])
 df.to_csv("transcripts.csv", encoding='utf-8', index=False)
 print(f"Wrote {len(transcripts)} records to transcripts.csv.")
 print(max(lens))
+print(input_lens)
+plt.hist(input_lens)
+plt.show()
 # %%
