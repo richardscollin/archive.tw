@@ -27,7 +27,8 @@ def get_transcript(tree: ElementTree, target_speaker: str):
                     # Do some preprocessing of the tokens
                     return re.sub(r'[^\x00-\x7F]+', ' ', text)
 
-            input  = " ".join(" ".join([process_speech(e) for e in g1[1]]).split()[:600])
+            # hypothesis all that matters is the last 100 words
+            input  = " ".join(" ".join([process_speech(e) for e in g1[1]]).split()[-100:])
             output = " ".join(" ".join([process_speech(e) for e in g2[1]]).split()[:900])
             row = Row(input, output)
             input_len = len(input.split())
@@ -36,9 +37,9 @@ def get_transcript(tree: ElementTree, target_speaker: str):
             lens.add(output_len)
             input_lens[input_len] += 1
 
-            # if input_len > 600:
-                # print(input)
-                # print(len(output.split()))
+            if input_len > 300:
+                print(input)
+                print(len(output.split()))
 
             result.append(row)
     return result
