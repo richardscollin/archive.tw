@@ -17,8 +17,9 @@ def get_transcript(tree: ElementTree, target_speaker: str):
         if g2[0] == target_speaker:
             input  = " ".join([(e.find('p').text or "").strip() for e in g1[1]])
             output = " ".join([(e.find('p').text or "").strip() for e in g2[1]])
-            row = Row(input, output)
-            result.append(row)
+            if len(output.split()) <= 4000 and len(input.split()) <= 1500:
+                row = Row(input, output)
+                result.append(row)
     return result
 
 #%%
@@ -31,6 +32,7 @@ for fn in xml_files:
     # '#唐鳳'
     transcript = get_transcript(tree, "#Audrey Tang")
     transcripts.extend(transcript)
+transcripts = transcripts[:24000]
 
 # %%
 df = pd.DataFrame(transcripts, columns=["input", "output"])
