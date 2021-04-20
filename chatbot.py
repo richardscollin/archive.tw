@@ -23,10 +23,10 @@ def get_transcript(tree: ElementTree, target_speaker: str):
                     return ""
                 else:
                     # Do some preprocessing of the tokens
-                    return " ".join(re.sub(r'[^\x00-\x7F]+', ' ', text).strip().split()[:900])
+                    return re.sub(r'[^\x00-\x7F]+', ' ', text)
 
-            input  = " ".join([process_speech(e) for e in g1[1]])
-            output = " ".join([process_speech(e) for e in g2[1]])
+            input  = " ".join([process_speech(e) for e in g1[1]][:900])
+            output = " ".join([process_speech(e) for e in g2[1]][:900])
             row = Row(input, output)
             result.append(row)
     return result
