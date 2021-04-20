@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 Row = namedtuple('Row', ['input', 'output'])
 # %%
+lens = set()
 def get_transcript(tree: ElementTree, target_speaker: str):
     # fold text in different speech nodes by the same target_speaker
     speeches = [(k,list(v)) for k,v in itertools.groupby(tree.findall('.//speech'), key=lambda e: e.attrib['by'])]
@@ -25,9 +26,11 @@ def get_transcript(tree: ElementTree, target_speaker: str):
                     # Do some preprocessing of the tokens
                     return re.sub(r'[^\x00-\x7F]+', ' ', text)
 
-            input  = " ".join([process_speech(e) for e in g1[1]][:900])
-            output = " ".join([process_speech(e) for e in g2[1]][:900])
+            input  = " ".join(" ".join([process_speech(e) for e in g1[1]]).split()[:900])
+            output = " ".join(" ".join([process_speech(e) for e in g2[1]]).split()[:900])
             row = Row(input, output)
+            lens.add(len(input.split()))
+            lens.add(len(output.split()))
             result.append(row)
     return result
 
@@ -47,4 +50,5 @@ transcripts = transcripts[:24000]
 df = pd.DataFrame(transcripts, columns=["input", "output"])
 df.to_csv("transcripts.csv", encoding='utf-8', index=False)
 print(f"Wrote {len(transcripts)} records to transcripts.csv.")
+print(max(lens))
 # %%
