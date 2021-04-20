@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # %%
-import os,sys,csv,itertools
+import re,os,sys,csv,itertools
 import pandas as pd
 from typing import List,Tuple,Iterable
 from xml.etree import ElementTree
@@ -15,8 +15,17 @@ def get_transcript(tree: ElementTree, target_speaker: str):
     result = []
     for (g1, g2) in zip(speeches[:-1], speeches[1:]):
         if g2[0] == target_speaker:
-            input  = " ".join([(e.find('p').text or "").strip() for e in g1[1]])
-            output = " ".join([(e.find('p').text or "").strip() for e in g2[1]])
+
+            def process_speech(e):
+                text = e.find('p').text
+                if not text:
+                    return ""
+                else:
+                    # Do some preprocessing of the tokens
+                    return re.sub(r'[^\x00-\x7F]+', ' ', text).strip()
+
+            input  = " ".join([process_speech(e) for e in g1[1]])
+            output = " ".join([process_speech(e) for e in g2[1]])
             if len(output.split()) <= 4000 and len(input.split()) <= 1500:
                 row = Row(input, output)
                 result.append(row)
